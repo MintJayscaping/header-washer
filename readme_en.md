@@ -1,5 +1,7 @@
 # Header Washer — OpenAI-Compatible Edition
 
+[中文](README.md)
+
 A Cloudflare Worker that acts as a request-header inspection and sanitization tool. It disguises itself as an OpenAI-compatible LLM endpoint — when you send it a message through an API relay (NewAPI / OneAPI, etc.), it replies directly in the chat with a **before-and-after header comparison report**, so you can verify whether sensitive information has been properly stripped.
 
 ## What It Does
