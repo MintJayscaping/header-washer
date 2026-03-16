@@ -21,10 +21,10 @@ export default {
       originalHeadersObj[key] = value;
     }
 
-    // 2. 进洗头房：清洗特征
+    // 2. 进洗头房：在真实请求头上执行清洗
     const cleanedHeaders = new Headers(request.headers);
     const sensitiveHeaders = [
-      'cf-connecting-ip', 'cf-ipcountry', 'cf-ray', 'cf-visitor', 'cf-worker', 
+      'cf-connecting-ip', 'cf-ipcountry', 'cf-ray', 'cf-visitor', 'cf-worker',
       'x-forwarded-for', 'x-real-ip', 'referer', 'origin', 'x-title',
       'x-oneapi-request-id', 'new-api-user', 'cookie'
     ];
@@ -32,14 +32,21 @@ export default {
 
     const keysToDelete = [];
     for (const [key, value] of cleanedHeaders.entries()) {
-        if (key.toLowerCase().startsWith('x-')) keysToDelete.push(key); 
+        if (key.toLowerCase().startsWith('x-')) keysToDelete.push(key);
     }
     keysToDelete.forEach(key => cleanedHeaders.delete(key));
 
-    // 3. 伪装
+    // 3. 伪装 User-Agent
     cleanedHeaders.set('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/122.0.0.0 Safari/537.36');
+
+    // 4. 用清洗后的 Header 构建一个真实的新 Request（可直接用于 fetch 转发）
+    //    这里我们只差一步 fetch(cleanedRequest, targetUrl) 就是生产级清洗了
+    //    但本脚本不转发，而是把清洗结果回显给用户
+    const cleanedRequest = new Request(request, { headers: cleanedHeaders });
+
+    // 5. 从清洗后的真实 Request 中读取 Header
     const cleanedHeadersObj = {};
-    for (const [key, value] of cleanedHeaders.entries()) {
+    for (const [key, value] of cleanedRequest.headers.entries()) {
       cleanedHeadersObj[key] = value;
     }
 
